@@ -1,17 +1,16 @@
-import {Injectable} from '@nestjs/common';
-import {Document} from '../entities/document.entity';
-import {DocumentQueueService} from '../queues/document.queue';
+import { Injectable } from '@nestjs/common';
+import { Document } from '../entities/document.entity';
+import { DocumentQueueService } from '../queues/document.queue';
 
 @Injectable()
 export class DocumentService {
     private readonly documents: Document[] = [];
 
-    constructor(private readonly documentQueueService: DocumentQueueService) {
-    }
+    constructor(private readonly documentQueueService: DocumentQueueService) {}
 
     create(document: Document): Document {
         this.documents.push(document);
-        this.documentQueueService.addJob('documentCreated', {document});
+        this.documentQueueService.addJob('documentCreated', { document });
         return document;
     }
 

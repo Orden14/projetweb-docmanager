@@ -1,16 +1,16 @@
-import {Field, InputType} from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateDocumentDto {
     @Field()
-    title: string;
+        title: string;
 
     @Field()
-    description: string;
+        description: string;
 
     @Field()
-    fileUrl: string;
+        fileUrl: string;
 
     @Field()
-    userId: string;
+        userId: string;
 }

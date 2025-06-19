@@ -1,19 +1,19 @@
-import {Field, ObjectType} from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Document {
     @Field()
-    id: string;
+        id: string;
 
     @Field()
-    title: string;
+        title: string;
 
     @Field()
-    description: string;
+        description: string;
 
     @Field()
-    fileUrl: string;
+        fileUrl: string;
 
     @Field()
-    userId: string;
+        userId: string;
 }

@@ -1,6 +1,6 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {HealthController} from './health.controller';
-import {DocumentQueueService} from '../queues/document.queue';
+import { Test, TestingModule } from '@nestjs/testing';
+import { HealthController } from './health.controller';
+import { DocumentQueueService } from '../queues/document.queue';
 
 describe('HealthController', () => {
     let healthController: HealthController;

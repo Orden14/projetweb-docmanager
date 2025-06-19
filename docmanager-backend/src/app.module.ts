@@ -1,13 +1,13 @@
-import {Module} from '@nestjs/common';
-import {GraphQLModule} from '@nestjs/graphql';
-import {ApolloDriver, ApolloDriverConfig} from '@nestjs/apollo';
-import {HealthResolver} from './health/health.resolver';
-import {DocumentResolver} from './resolvers/document.resolver';
-import {DocumentService} from './services/document.service';
-import {UserResolver} from './resolvers/user.resolver';
-import {UserService} from './services/user.service';
-import {HealthController} from './health/health.controller';
-import {DocumentQueueService} from './queues/document.queue';
+import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { HealthResolver } from './health/health.resolver';
+import { DocumentResolver } from './resolvers/document.resolver';
+import { DocumentService } from './services/document.service';
+import { UserResolver } from './resolvers/user.resolver';
+import { UserService } from './services/user.service';
+import { HealthController } from './health/health.controller';
+import { DocumentQueueService } from './queues/document.queue';
 
 @Module({
     imports: [
@@ -28,5 +28,4 @@ import {DocumentQueueService} from './queues/document.queue';
         DocumentQueueService,
     ],
 })
-export class AppModule {
-}
+export class AppModule {}

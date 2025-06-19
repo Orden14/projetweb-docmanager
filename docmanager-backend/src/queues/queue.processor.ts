@@ -1,5 +1,5 @@
-import {Processor, Process} from '@nestjs/bull';
-import {Job} from 'bullmq';
+import { Processor, Process } from '@nestjs/bull';
+import { Job } from 'bullmq';
 
 @Processor('documentQueue')
 export class QueueProcessor {

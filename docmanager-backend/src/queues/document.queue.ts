@@ -1,8 +1,8 @@
-import {Queue, Worker} from 'bullmq';
-import {Injectable} from '@nestjs/common';
-import {Logger} from '@nestjs/common';
+import { Queue, Worker } from 'bullmq';
+import { Injectable } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 
-const redisConfig = {host: 'localhost', port: 6379};
+const redisConfig = { host: 'localhost', port: 6379 };
 
 @Injectable()
 export class DocumentQueueService {
@@ -10,7 +10,7 @@ export class DocumentQueueService {
     private readonly logger = new Logger(DocumentQueueService.name);
 
     constructor() {
-        this.queue = new Queue('documentQueue', {connection: redisConfig});
+        this.queue = new Queue('documentQueue', { connection: redisConfig });
 
         new Worker(
             'documentQueue',
@@ -18,7 +18,7 @@ export class DocumentQueueService {
                 this.logger.log(`Processing job: ${job.name}`);
                 this.logger.log(`Data: ${JSON.stringify(job.data)}`);
             },
-            {connection: redisConfig},
+            { connection: redisConfig },
         );
     }
 

@@ -1,5 +1,5 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {HealthResolver} from './health.resolver';
+import { Test, TestingModule } from '@nestjs/testing';
+import { HealthResolver } from './health.resolver';
 
 describe('HealthResolver', () => {
     let resolver: HealthResolver;
