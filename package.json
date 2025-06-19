@@ -1,0 +1,20 @@
+{
+  "name": "projetweb-docmanager",
+  "version": "1.0.0",
+  "description": "RabbitMQ docker\r ```bash\r docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4-management\r ```",
+  "homepage": "https://github.com/Orden14/projetweb-docmanager#readme",
+  "bugs": {
+    "url": "https://github.com/Orden14/projetweb-docmanager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Orden14/projetweb-docmanager.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
