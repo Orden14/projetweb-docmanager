@@ -6,8 +6,8 @@ import {DocumentResolver} from './resolvers/document.resolver';
 import {DocumentService} from './services/document.service';
 import {UserResolver} from './resolvers/user.resolver';
 import {UserService} from './services/user.service';
-import {HealthController} from "./health/health.controller";
-import {DocumentQueueService} from "./queues/document.queue";
+import {HealthController} from './health/health.controller';
+import {DocumentQueueService} from './queues/document.queue';
 
 @Module({
     imports: [
@@ -18,18 +18,15 @@ import {DocumentQueueService} from "./queues/document.queue";
             debug: true,
         }),
     ],
-    controllers: [
-        HealthController
-    ],
+    controllers: [HealthController],
     providers: [
         HealthResolver,
         DocumentResolver,
         DocumentService,
         UserResolver,
         UserService,
-        DocumentQueueService
+        DocumentQueueService,
     ],
 })
-
 export class AppModule {
 }

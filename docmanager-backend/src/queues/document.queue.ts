@@ -12,10 +12,14 @@ export class DocumentQueueService {
     constructor() {
         this.queue = new Queue('documentQueue', {connection: redisConfig});
 
-        new Worker('documentQueue', async (job) => {
-            this.logger.log(`Processing job: ${job.name}`);
-            this.logger.log(`Data: ${JSON.stringify(job.data)}`);
-        }, {connection: redisConfig});
+        new Worker(
+            'documentQueue',
+            async (job) => {
+                this.logger.log(`Processing job: ${job.name}`);
+                this.logger.log(`Data: ${JSON.stringify(job.data)}`);
+            },
+            {connection: redisConfig},
+        );
     }
 
     async addJob(name: string, data: any) {
