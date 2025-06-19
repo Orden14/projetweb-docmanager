@@ -1,20 +1,25 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bullmq';
+import {Document} from "../entities/document.entity";
+
+interface DocumentJobData {
+    document: Document;
+}
 
 @Processor('documentQueue')
 export class QueueProcessor {
     @Process('healthCheckJob')
-    async handleHealthCheckJob(job: Job): Promise<void> {
+    handleHealthCheckJob(job: Job): void {
         console.log('Processing job:', job.data);
     }
 
     @Process('documentCreated')
-    async handleDocumentCreated(job: Job): Promise<void> {
+    handleDocumentCreated(job: Job<DocumentJobData>): void {
         console.log('Document created:', job.data.document);
     }
 
     @Process('documentDeleted')
-    async handleDocumentDeleted(job: Job): Promise<void> {
+    handleDocumentDeleted(job: Job<DocumentJobData>): void {
         console.log('Document deleted:', job.data.document);
     }
 }
