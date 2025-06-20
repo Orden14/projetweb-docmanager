@@ -19,7 +19,10 @@ describe('DocumentResolver', () => {
 
     it('devrait créer un document', () => {
         const createDocumentDto: CreateDocumentDto = { title: 'Doc1', description: 'Description1', fileUrl: 'url1', userId: 'user1' };
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const document = { id: expect.any(String), ...createDocumentDto };
+
         jest.spyOn(mockDocumentService, 'create').mockReturnValue(document);
 
         const result = documentResolver.createDocument(createDocumentDto);

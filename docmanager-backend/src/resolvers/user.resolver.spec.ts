@@ -13,7 +13,10 @@ describe('UserResolver', () => {
 
     it('devrait créer un utilisateur', () => {
         const createUserDto: CreateUserDto = { name: 'John Doe', email: 'john@example.com', role: 'admin' };
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const user = { id: expect.any(String), ...createUserDto };
+
         jest.spyOn(mockUserService, 'create').mockReturnValue(user);
 
         const result = userResolver.createUser(createUserDto);
