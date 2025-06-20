@@ -26,11 +26,12 @@ export default tseslint.config(
     },
     {
         rules: {
+            'prettier/prettier': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
-            '@typescript-eslint/no-floating-promises': 'warn',
+            '@typescript-eslint/unbound-method': 'off',
+            '@typescript-eslint/no-floating-promises': 'off',
             '@typescript-eslint/no-unsafe-argument': 'warn',
             indent: ['warn', 4],
-            'prettier/prettier': 'off',
         },
     },
 );
