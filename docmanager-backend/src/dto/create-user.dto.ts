@@ -1,13 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { Role } from '@prisma/client';
 
-@InputType()
 export class CreateUserDto {
-    @Field()
-        name: string;
-
-    @Field()
-        email: string;
-
-    @Field()
-        role: string;
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
 }
