@@ -4,3 +4,24 @@ services:
         container_name: redis
         ports:
             - '6379:6379'
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: docmanager-backend
+        ports:
+            - '3000:3000'
+        depends_on:
+            redis:
+                condition: service_healthy
+        healthcheck:
+            test: [ "CMD-SHELL", "curl -f http://localhost:3000/health || exit 1" ]
+            interval: 10s
+            timeout: 5s
+            retries: 3

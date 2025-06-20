@@ -3,17 +3,17 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Log {
     @Field()
-    id: string;
+        id: string;
 
     @Field()
-    action: string;
+        action: string;
 
     @Field()
-    timestamp: Date;
+        timestamp: Date;
 
     @Field()
-    userId: string;
+        userId: string;
 
     @Field()
-    documentId: string;
+        documentId: string;
 }

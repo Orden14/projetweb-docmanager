@@ -1,0 +1,51 @@
+name: CI Pipeline
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Install dependencies
+                run: npm install
+                working-directory: docmanager-backend
+
+            -   name: Run lint
+                run: npm run lint
+                working-directory: docmanager-backend
+
+            -   name: Run tests
+                run: npm run test
+                working-directory: docmanager-backend
+
+    docker-build:
+        if: github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        needs: tests
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Log in to DockerHub
+                uses: docker/login-action@v2
+                with:
+                    username: ${{ secrets.DOCKER_EMAIL }}
+                    password: ${{ secrets.DOCKER_PASSWORD }}
+
+            -   name: Build Docker image
+                run: docker build -t docmanager-backend .
+                working-directory: docmanager-backend
+
+            -   name: Push Docker image
+                run: docker tag docmanager-backend:latest testuserforclass/docmanager-backend:latest && docker push testuserforclass/docmanager-backend:latest
