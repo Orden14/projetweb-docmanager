@@ -9,35 +9,45 @@ export class DocumentResolver {
     constructor(private readonly documentService: DocumentService) {}
 
     @Query(() => [Document])
-    findAllDocuments(): Document[] {
-        return this.documentService.findAll();
+    async findAllDocuments(): Promise<Document[]> {
+        return await this.documentService.findAll();
     }
 
     @Query(() => [Document])
-    getDocumentsByUser(@Args('userId') userId: string): Document[] {
-        return this.documentService.findByUser(userId);
+    async getDocumentsByUser(@Args('userId') userId: string): Promise<Document[]> {
+        return await this.documentService.findByUser(userId);
     }
 
     @Query(() => Document, { nullable: true })
-    getDocumentById(@Args('id') id: string): Document | null {
-        return this.documentService.findById(id);
+    async getDocumentById(@Args('id') id: string): Promise<Document | null> {
+        return await this.documentService.findById(id);
     }
 
     @Mutation(() => Document)
-    createDocument(
+    async createDocument(
         @Args('createDocumentDto') createDocumentDto: CreateDocumentDto,
-    ): Document {
-        const document: Document = { id: uuidv4(), ...createDocumentDto };
-        return this.documentService.create(document);
+    ): Promise<Document> {
+        return await this.documentService.createDocument(createDocumentDto);
     }
 
     @Mutation(() => Document, { nullable: true })
-    updateDocument(
+    async updateDocument(
         @Args('id') id: string,
         @Args('title', { nullable: true }) title?: string,
         @Args('description', { nullable: true }) description?: string,
         @Args('fileUrl', { nullable: true }) fileUrl?: string,
-    ): Document | null {
-        return this.documentService.update(id, { title, description, fileUrl });
+        @Args('userId', { nullable: true }) userId?: string,
+    ): Promise<Document | null> {
+        const updateDto: any = {};
+        if (title !== undefined) updateDto.title = title;
+        if (description !== undefined) updateDto.description = description;
+        if (fileUrl !== undefined) updateDto.fileUrl = fileUrl;
+        if (userId !== undefined) updateDto.userId = userId;
+        return await this.documentService.update(id, updateDto);
+    }
+
+    @Mutation(() => Document, { nullable: true })
+    async deleteDocument(@Args('id') id: string): Promise<Document | null> {
+        return await this.documentService.delete(id);
     }
 }

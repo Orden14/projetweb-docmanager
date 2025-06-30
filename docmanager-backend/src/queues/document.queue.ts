@@ -1,17 +1,8 @@
 import {Queue} from 'bullmq';
-import {Injectable} from '@nestjs/common';
-import {Logger} from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
-
-const host: string = process.env.REDIS_HOST || 'localhost';
-const port: number = process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379;
-
-const redisConfig = {
-    host: host,
-    port: port,
-};
 
 @Injectable()
 export class DocumentQueueService {
@@ -19,7 +10,9 @@ export class DocumentQueueService {
     private readonly logger = new Logger(DocumentQueueService.name);
 
     constructor() {
-        this.queue = new Queue('documentQueue', {connection: redisConfig});
+        this.queue = new Queue('documentQueue', {
+            connection: { url: process.env.REDIS_URL || 'redis://redis:6379' }
+        });
     }
 
     async addJob(name: string, data: any) {
