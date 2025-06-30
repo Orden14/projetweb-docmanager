@@ -1,7 +1,7 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { DocumentService } from '../services/document.service';
-import { Document } from '../entities/document.entity';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateDocumentDto } from '../dto/create-document.dto';
+import { Document } from '../entities/document.entity';
+import { DocumentService } from '../services/document.service';
 
 @Resolver(() => Document)
 export class DocumentResolver {

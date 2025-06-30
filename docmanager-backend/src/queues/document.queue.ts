@@ -1,5 +1,5 @@
-import {Queue} from 'bullmq';
-import {Injectable, Logger} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
