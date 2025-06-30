@@ -1,30 +1,115 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentService } from './document.service';
-import { Document } from '../entities/document.entity';
-import { DocumentQueueService } from '../queues/document.queue';
+import { Document } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateDocumentDto } from '../dto/create-document.dto';
 
 describe('DocumentService', () => {
-    let documentService: DocumentService;
-    let mockQueueService: DocumentQueueService;
+    let service: DocumentService;
+    let prismaService: PrismaService;
 
-    beforeEach(() => {
-        mockQueueService = { addJob: jest.fn() } as unknown as DocumentQueueService;
-        documentService = new DocumentService(mockQueueService);
+    const mockDocument: Document = {
+        id: '1',
+        title: 'Test Document',
+        description: 'Test Description',
+        fileUrl: 'test.pdf',
+        userId: 'user1'
+    };
+
+    const mockCreateDocumentDto: CreateDocumentDto = {
+        title: 'Test Document',
+        description: 'Test Description',
+        fileUrl: 'test.pdf',
+        userId: 'user1'
+    };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                DocumentService,
+                {
+                    provide: PrismaService,
+                    useValue: {
+                        document: {
+                            create: jest.fn().mockResolvedValue(mockDocument),
+                            findMany: jest.fn().mockResolvedValue([mockDocument]),
+                            findFirst: jest.fn().mockResolvedValue(mockDocument),
+                            update: jest.fn().mockResolvedValue(mockDocument),
+                            delete: jest.fn().mockResolvedValue(mockDocument),
+                        },
+                    },
+                },
+            ],
+        }).compile();
+
+        service = module.get<DocumentService>(DocumentService);
+        prismaService = module.get<PrismaService>(PrismaService);
     });
 
-    it('devrait créer un document', () => {
-        const document: Document = { id: '1', title: 'Doc1', description: 'Description1', fileUrl: 'url1', userId: 'user1' };
-        const createdDocument = documentService.create(document);
-        expect(createdDocument).toEqual(document);
-        expect(documentService.findAll()).toContain(document);
-        expect(mockQueueService.addJob).toHaveBeenCalledWith('documentCreated', { document });
+    it('should be defined', () => {
+        expect(service).toBeDefined();
     });
 
-    it('devrait retourner tous les documents', () => {
-        const document1: Document = { id: '1', title: 'Doc1', description: 'Description1', fileUrl: 'url1', userId: 'user1' };
-        const document2: Document = { id: '2', title: 'Doc2', description: 'Description2', fileUrl: 'url2', userId: 'user2' };
-        documentService.create(document1);
-        documentService.create(document2);
-        const documents = documentService.findAll();
-        expect(documents).toEqual([document1, document2]);
+    describe('createDocument', () => {
+        it('should create a document', async () => {
+            const result = await service.createDocument(mockCreateDocumentDto);
+            expect(result).toEqual(mockDocument);
+            expect(prismaService.document.create).toHaveBeenCalledWith({
+                data: mockCreateDocumentDto,
+            });
+        });
+    });
+
+    describe('findAll', () => {
+        it('should return all documents', async () => {
+            const result = await service.findAll();
+            expect(result).toEqual([mockDocument]);
+            expect(prismaService.document.findMany).toHaveBeenCalled();
+        });
+    });
+
+    describe('findByUser', () => {
+        it('should return user documents', async () => {
+            const userId = 'user1';
+            const result = await service.findByUser(userId);
+            expect(result).toEqual([mockDocument]);
+            expect(prismaService.document.findMany).toHaveBeenCalledWith({
+                where: { userId },
+            });
+        });
+    });
+
+    describe('findById', () => {
+        it('should return a document by id', async () => {
+            const id = '1';
+            const result = await service.findById(id);
+            expect(result).toEqual(mockDocument);
+            expect(prismaService.document.findFirst).toHaveBeenCalledWith({
+                where: { id },
+            });
+        });
+    });
+
+    describe('update', () => {
+        it('should update a document', async () => {
+            const id = '1';
+            const result = await service.update(id, mockCreateDocumentDto);
+            expect(result).toEqual(mockDocument);
+            expect(prismaService.document.update).toHaveBeenCalledWith({
+                where: { id },
+                data: mockCreateDocumentDto,
+            });
+        });
+    });
+
+    describe('delete', () => {
+        it('should delete a document', async () => {
+            const id = '1';
+            const result = await service.delete(id);
+            expect(result).toEqual(mockDocument);
+            expect(prismaService.document.delete).toHaveBeenCalledWith({
+                where: { id },
+            });
+        });
     });
 });

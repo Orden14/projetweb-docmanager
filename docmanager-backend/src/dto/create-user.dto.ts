@@ -8,14 +8,14 @@ registerEnumType(Role, {
 @InputType()
 export class CreateUserDto {
     @Field()
-    name: string;
+        name: string;
 
     @Field()
-    email: string;
+        email: string;
 
     @Field()
-    password: string;
+        password: string;
 
     @Field(() => Role)
-    role: Role;
+        role: Role;
 }
