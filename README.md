@@ -2,9 +2,9 @@
 
 ## Groupe
 
-Thomas L.
-David W.
-Antoine H.
+Thomas L.  
+David W.  
+Antoine H.  
 
 ## Projet déployé
 

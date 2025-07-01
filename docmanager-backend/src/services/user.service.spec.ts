@@ -1,26 +1,80 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { User } from '../entities/user.entity';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { User } from '@prisma/client';
 
 describe('UserService', () => {
-    let userService: UserService;
+    let service: UserService;
+    let prismaService: PrismaService;
 
-    beforeEach(() => {
-        userService = new UserService();
+    const mockUser: User = {
+        id: '1',
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'hashedPassword',
+        role: 'USER',
+        createdAt: new Date()
+    };
+
+    const mockCreateUserDto: CreateUserDto = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password',
+        role: 'USER'
+    };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                UserService,
+                {
+                    provide: PrismaService,
+                    useValue: {
+                        user: {
+                            create: jest.fn().mockResolvedValue(mockUser),
+                            findMany: jest.fn().mockResolvedValue([mockUser]),
+                            findUnique: jest.fn().mockResolvedValue(mockUser),
+                        },
+                    },
+                },
+            ],
+        }).compile();
+
+        service = module.get<UserService>(UserService);
+        prismaService = module.get<PrismaService>(PrismaService);
     });
 
-    it('devrait créer un utilisateur', () => {
-        const user: User = { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' };
-        const createdUser = userService.create(user);
-        expect(createdUser).toEqual(user);
-        expect(userService.findAll()).toContain(user);
+    it('should be defined', () => {
+        expect(service).toBeDefined();
     });
 
-    it('devrait retourner tous les utilisateurs', () => {
-        const user1: User = { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' };
-        const user2: User = { id: '2', name: 'Jane Doe', email: 'jane@example.com', role: 'user' };
-        userService.create(user1);
-        userService.create(user2);
-        const users = userService.findAll();
-        expect(users).toEqual([user1, user2]);
+    describe('createUser', () => {
+        it('should create a user', async () => {
+            const result = await service.createUser(mockCreateUserDto);
+            expect(result).toEqual(mockUser);
+            expect(prismaService.user.create).toHaveBeenCalledWith({
+                data: mockCreateUserDto,
+            });
+        });
+    });
+
+    describe('findAllUser', () => {
+        it('should return all users', async () => {
+            const result = await service.findAllUser();
+            expect(result).toEqual([mockUser]);
+            expect(prismaService.user.findMany).toHaveBeenCalled();
+        });
+    });
+
+    describe('findUser', () => {
+        it('should return a user by id', async () => {
+            const id = '1';
+            const result = await service.findUser(id);
+            expect(result).toEqual(mockUser);
+            expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+                where: { id },
+            });
+        });
     });
 });

@@ -1,48 +1,53 @@
-import {Injectable} from '@nestjs/common';
-import {Document} from '../entities/document.entity';
-import {DocumentQueueService} from '../queues/document.queue';
+import { Injectable } from '@nestjs/common';
+import { CreateDocumentDto } from '../dto/create-document.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DocumentService {
-    private readonly documents: Document[] = [];
+    constructor(private readonly prisma: PrismaService) {}
 
-    constructor(private readonly documentQueueService: DocumentQueueService) {
-    }
-
-    create(document: Document): Document {
-        this.documents.push(document);
-        this.documentQueueService.addJob('documentCreated', {document});
-        return document;
-    }
-
-    delete(documentId: string): boolean {
-        const index = this.documents.findIndex((doc) => doc.id === documentId);
-        if (index === -1) return false;
-
-        const [deletedDocument] = this.documents.splice(index, 1);
-        this.documentQueueService.addJob('documentDeleted', {
-            document: deletedDocument,
+    async createDocument(createDocumentDto: CreateDocumentDto) {
+        const document = await this.prisma.document.create({
+            data: createDocumentDto,
         });
-        return true;
-    }
 
-    findAll(): Document[] {
-        return this.documents;
-    }
-
-    findByUser(userId: string): Document[] {
-        return this.documents.filter((doc) => doc.userId === userId);
-    }
-
-    findById(id: string): Document | null {
-        return this.documents.find((doc) => doc.id === id) || null;
-    }
-
-    update(id: string, updates: Partial<Document>): Document | null {
-        const document = this.findById(id);
-        if (!document) return null;
-
-        Object.assign(document, updates);
         return document;
+    }
+
+    async delete(documentId: string) {
+        return await this.prisma.document.delete({
+            where: {
+                id: documentId,
+            },
+        });
+    }
+
+    async findAll() {
+        return await this.prisma.document.findMany();
+    }
+
+    async findByUser(userId: string) {
+        return await this.prisma.document.findMany({
+            where: {
+                userId: userId,
+            },
+        });
+    }
+
+    async findById(id: string) {
+        return await this.prisma.document.findFirst({
+            where: {
+                id: id,
+            },
+        });
+    }
+
+    async update(id: string, createDocumentDto: CreateDocumentDto) {
+        return await this.prisma.document.update({
+            where: {
+                id: id,
+            },
+            data: createDocumentDto,
+        });
     }
 }

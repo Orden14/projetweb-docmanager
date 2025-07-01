@@ -1,4 +1,9 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Role } from '@prisma/client';
+
+registerEnumType(Role, {
+    name: 'Role',
+});
 
 @InputType()
 export class CreateUserDto {
@@ -9,5 +14,8 @@ export class CreateUserDto {
         email: string;
 
     @Field()
-        role: string;
+        password: string;
+
+    @Field(() => Role)
+        role: Role;
 }

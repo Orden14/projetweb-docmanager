@@ -1,35 +1,68 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
 import { UserService } from '../services/user.service';
+import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { Role } from '@prisma/client';
 
 describe('UserResolver', () => {
-    let userResolver: UserResolver;
-    let mockUserService: UserService;
+    let resolver: UserResolver;
 
-    beforeEach(() => {
-        mockUserService = { create: jest.fn(), findAll: jest.fn() } as unknown as UserService;
-        userResolver = new UserResolver(mockUserService);
+    const mockUser: User = {
+        id: '1',
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'password',
+        role: Role.USER,
+    };
+
+    const mockCreateUserDto: CreateUserDto = {
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'password',
+        role: Role.USER
+    };
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                UserResolver,
+                {
+                    provide: UserService,
+                    useValue: {
+                        findAllUser: jest.fn().mockResolvedValue([mockUser]),
+                        findUser: jest.fn().mockResolvedValue(mockUser),
+                        createUser: jest.fn().mockResolvedValue(mockUser)
+                    }
+                }
+            ]
+        }).compile();
+
+        resolver = module.get<UserResolver>(UserResolver);
     });
 
-    it('devrait créer un utilisateur', () => {
-        const createUserDto: CreateUserDto = { name: 'John Doe', email: 'john@example.com', role: 'admin' };
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const user = { id: expect.any(String), ...createUserDto };
-
-        jest.spyOn(mockUserService, 'create').mockReturnValue(user);
-
-        const result = userResolver.createUser(createUserDto);
-        expect(result).toEqual(user);
-        expect(mockUserService.create).toHaveBeenCalledWith(user);
+    it('should be defined', () => {
+        expect(resolver).toBeDefined();
     });
 
-    it('devrait retourner tous les utilisateurs', () => {
-        const users = [{ id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' }];
-        jest.spyOn(mockUserService, 'findAll').mockReturnValue(users);
+    describe('findAllUsers', () => {
+        it('should return an array of users', async () => {
+            const result = await resolver.findAllUsers();
+            expect(result).toEqual([mockUser]);
+        });
+    });
 
-        const result = userResolver.findAllUsers();
-        expect(result).toEqual(users);
-        expect(mockUserService.findAll).toHaveBeenCalled();
+    describe('getUserById', () => {
+        it('should return a single user', async () => {
+            const result = await resolver.getUserById('1');
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('createUser', () => {
+        it('should create a user', async () => {
+            const result = await resolver.createUser(mockCreateUserDto);
+            expect(result).toEqual(mockUser);
+        });
     });
 });

@@ -1,43 +1,53 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { DocumentService } from '../services/document.service';
-import { Document } from '../entities/document.entity';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateDocumentDto } from '../dto/create-document.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { Document } from '../entities/document.entity';
+import { DocumentService } from '../services/document.service';
 
 @Resolver(() => Document)
 export class DocumentResolver {
     constructor(private readonly documentService: DocumentService) {}
 
     @Query(() => [Document])
-    findAllDocuments(): Document[] {
-        return this.documentService.findAll();
+    async findAllDocuments(): Promise<Document[]> {
+        return await this.documentService.findAll();
     }
 
     @Query(() => [Document])
-    getDocumentsByUser(@Args('userId') userId: string): Document[] {
-        return this.documentService.findByUser(userId);
+    async getDocumentsByUser(@Args('userId') userId: string): Promise<Document[]> {
+        return await this.documentService.findByUser(userId);
     }
 
     @Query(() => Document, { nullable: true })
-    getDocumentById(@Args('id') id: string): Document | null {
-        return this.documentService.findById(id);
+    async getDocumentById(@Args('id') id: string): Promise<Document | null> {
+        return await this.documentService.findById(id);
     }
 
     @Mutation(() => Document)
-    createDocument(
+    async createDocument(
         @Args('createDocumentDto') createDocumentDto: CreateDocumentDto,
-    ): Document {
-        const document: Document = { id: uuidv4(), ...createDocumentDto };
-        return this.documentService.create(document);
+    ): Promise<Document> {
+        return await this.documentService.createDocument(createDocumentDto);
+    }
+
+    @Mutation(() => Document)
+    async updateDocument(
+        @Args('id') id: string,
+        @Args('title', { nullable: true }) title: string,
+        @Args('description', { nullable: true }) description: string,
+        @Args('fileUrl', { nullable: true }) fileUrl: string,
+        @Args('userId', { nullable: true }) userId: string,
+    ): Promise<Document> {
+        const updateDto: CreateDocumentDto = {
+            title,
+            description,
+            fileUrl,
+            userId,
+        };
+        return await this.documentService.update(id, updateDto);
     }
 
     @Mutation(() => Document, { nullable: true })
-    updateDocument(
-        @Args('id') id: string,
-        @Args('title', { nullable: true }) title?: string,
-        @Args('description', { nullable: true }) description?: string,
-        @Args('fileUrl', { nullable: true }) fileUrl?: string,
-    ): Document | null {
-        return this.documentService.update(id, { title, description, fileUrl });
+    async deleteDocument(@Args('id') id: string): Promise<Document | null> {
+        return await this.documentService.delete(id);
     }
 }
