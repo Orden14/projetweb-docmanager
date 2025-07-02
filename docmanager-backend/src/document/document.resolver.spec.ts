@@ -1,44 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentResolver } from './document.resolver';
-import { DocumentService } from './document.service';
-import { Document } from '../entities/document.entity';
+import { Queue } from 'bullmq';
+import { DocumentJobName } from '../enum/document.job.enum';
 import { CreateDocumentDto } from './create-document.dto';
+import { Document } from '../entities/document.entity';
 
 describe('DocumentResolver', () => {
     let resolver: DocumentResolver;
-
-    const mockDocument: Document = {
-        id: '1',
-        title: 'Test Document',
-        description: 'Test Description',
-        fileUrl: 'test.pdf',
-        userId: '1',
-    };
-
-    const mockCreateDocumentDto: CreateDocumentDto = {
-        title: 'Test Document',
-        description: 'Test Description',
-        fileUrl: 'test.pdf',
-        userId: '1',
-    };
+    let mockQueue: Partial<Queue>;
 
     beforeEach(async () => {
+        mockQueue = {
+            add: jest.fn().mockImplementation((name, data) => ({
+                waitUntilFinished: jest.fn().mockResolvedValue(
+                    name === DocumentJobName.FindAllDocuments ? [] : data
+                ),
+            })),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DocumentResolver,
-                {
-                    provide: DocumentService,
-                    useValue: {
-                        findAll: jest.fn().mockResolvedValue([mockDocument]),
-                        findByUser: jest.fn().mockResolvedValue([mockDocument]),
-                        findById: jest.fn().mockResolvedValue(mockDocument),
-                        createDocument: jest
-                            .fn()
-                            .mockResolvedValue(mockDocument),
-                        update: jest.fn().mockResolvedValue(mockDocument),
-                        delete: jest.fn().mockResolvedValue(mockDocument),
-                    },
-                },
+                { provide: 'BullQueue_document', useValue: mockQueue },
             ],
         }).compile();
 
@@ -49,51 +32,55 @@ describe('DocumentResolver', () => {
         expect(resolver).toBeDefined();
     });
 
-    describe('findAllDocuments', () => {
-        it('should return an array of documents', async () => {
-            const result = await resolver.findAllDocuments();
-            expect(result).toEqual([mockDocument]);
-        });
+    it('should find all documents', async () => {
+        const result = await resolver.findAllDocuments();
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.FindAllDocuments, {});
+        expect(result).toEqual([]);
     });
 
-    describe('getDocumentsByUser', () => {
-        it('should return documents for a specific user', async () => {
-            const result = await resolver.getDocumentsByUser('1');
-            expect(result).toEqual([mockDocument]);
-        });
+    it('should get documents by user', async () => {
+        const userId = '123';
+        const result = await resolver.getDocumentsByUser(userId);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.FindDocumentsByUser, { userId });
+        expect(result).toEqual({ userId });
     });
 
-    describe('getDocumentById', () => {
-        it('should return a single document', async () => {
-            const result = await resolver.getDocumentById('1');
-            expect(result).toEqual(mockDocument);
-        });
+    it('should get document by id', async () => {
+        const id = '456';
+        const result = await resolver.getDocumentById(id);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.FindDocumentById, { id });
+        expect(result).toEqual({ id });
     });
 
-    describe('createDocument', () => {
-        it('should create a document', async () => {
-            const result = await resolver.createDocument(mockCreateDocumentDto);
-            expect(result).toEqual(mockDocument);
-        });
+    it('should create a document', async () => {
+        const createDocumentDto: CreateDocumentDto = {
+            title: 'Test Title',
+            description: 'Test Description',
+            fileUrl: 'http://example.com/file',
+            userId: '789',
+        };
+        const result = await resolver.createDocument(createDocumentDto);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.CreateDocument, createDocumentDto);
+        expect(result).toEqual(createDocumentDto);
     });
 
-    describe('updateDocument', () => {
-        it('should update a document', async () => {
-            const result = await resolver.updateDocument(
-                '1',
-                'Updated Title',
-                'Updated Description',
-                'updated.pdf',
-                '1',
-            );
-            expect(result).toEqual(mockDocument);
-        });
+    it('should update a document', async () => {
+        const id = '123';
+        const updateDto: CreateDocumentDto = {
+            title: 'Updated Title',
+            description: 'Updated Description',
+            fileUrl: 'http://example.com/updated-file',
+            userId: '456',
+        };
+        const result = await resolver.updateDocument(id, updateDto.title, updateDto.description, updateDto.fileUrl, updateDto.userId);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.UpdateDocument, { id, data: updateDto });
+        expect(result).toEqual({ id, data: updateDto });
     });
 
-    describe('deleteDocument', () => {
-        it('should delete a document', async () => {
-            const result = await resolver.deleteDocument('1');
-            expect(result).toEqual(mockDocument);
-        });
+    it('should delete a document', async () => {
+        const id = '789';
+        const result = await resolver.deleteDocument(id);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.DeleteDocument, { documentId: id });
+        expect(result).toEqual({ documentId: id });
     });
 });

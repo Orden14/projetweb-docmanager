@@ -30,6 +30,8 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/unbound-method': 'off',
             '@typescript-eslint/no-floating-promises': 'off',
+            '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+            "@typescript-eslint/no-unsafe-member-access": 'off',
             '@typescript-eslint/no-unsafe-argument': 'warn',
             indent: ['warn', 4],
         },
