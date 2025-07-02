@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentResolver } from './document.resolver';
-import { DocumentService } from '../services/document.service';
+import { DocumentService } from './document.service';
 import { Document } from '../entities/document.entity';
-import { CreateDocumentDto } from '../dto/create-document.dto';
+import { CreateDocumentDto } from './create-document.dto';
 
 describe('DocumentResolver', () => {
     let resolver: DocumentResolver;

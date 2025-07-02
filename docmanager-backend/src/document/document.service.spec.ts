@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentService } from './document.service';
 import { Document } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateDocumentDto } from '../dto/create-document.dto';
+import { CreateDocumentDto } from './create-document.dto';
 
 describe('DocumentService', () => {
     let service: DocumentService;

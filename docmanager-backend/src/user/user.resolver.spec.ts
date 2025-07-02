@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
-import { UserService } from '../services/user.service';
+import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateUserDto } from './create-user.dto';
 import { Role } from '@prisma/client';
 
 describe('UserResolver', () => {
