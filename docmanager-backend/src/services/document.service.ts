@@ -1,17 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDocumentDto } from '../dto/create-document.dto';
-import { PrismaService } from '../prisma/prisma.service';
+import {Injectable} from '@nestjs/common';
+import {CreateDocumentDto} from '../dto/create-document.dto';
+import {PrismaService} from '../prisma/prisma.service';
 
 @Injectable()
 export class DocumentService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createDocument(createDocumentDto: CreateDocumentDto) {
-        const document = await this.prisma.document.create({
+        return await this.prisma.document.create({
             data: createDocumentDto,
         });
-
-        return document;
     }
 
     async delete(documentId: string) {
