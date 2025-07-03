@@ -7,17 +7,17 @@ export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createUser(createUserDto: CreateUserDto) {
-        return await this.prisma.user.create({
+        return this.prisma.user.create({
             data: createUserDto,
         });
     }
 
     async findAllUser() {
-        return await this.prisma.user.findMany();
+        return this.prisma.user.findMany();
     }
 
     async findUser(id: string) {
-        return await this.prisma.user.findUnique({
+        return this.prisma.user.findUnique({
             where: {
                 id,
             },
