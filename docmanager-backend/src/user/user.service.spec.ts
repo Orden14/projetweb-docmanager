@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './create-user.dto';
-import { User } from '@prisma/client';
+// import { User } from '@prisma/client'; // supprimé car inutilisé
 import * as bcrypt from 'bcrypt';
 
 describe('UserService', () => {

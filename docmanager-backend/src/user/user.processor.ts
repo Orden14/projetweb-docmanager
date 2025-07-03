@@ -19,9 +19,9 @@ export class UserProcessor extends WorkerHost {
         case UserJobName.FindAllUsers:
             return this.userService.findAllUser();
         case UserJobName.FindUserById:
-            return this.userService.findUser(job.data.id as string);
+            return this.userService.findUserById(job.data.id as string);
         default:
-            throw new Error(`Unknown job name: ${job.name}`);
+            throw new Error(`Unknown job name: ${String(job.name)}`);
         }
     }
 }

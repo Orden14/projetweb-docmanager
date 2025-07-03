@@ -45,7 +45,7 @@ describe('UserResolver', () => {
             const mockUsers = [{ id: '1', name: 'John Doe' }];
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUsers),
-            } as any);
+            } as unknown as import('bullmq').Job<any, any, string>);
 
             const result = await resolver.findAllUsers();
             expect(result).toEqual(mockUsers);
@@ -58,7 +58,7 @@ describe('UserResolver', () => {
             const mockUser = { id: '1', name: 'John Doe' };
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
-            } as any);
+            } as unknown as import('bullmq').Job<any, any, string>);
 
             const result = await resolver.getUserById('1');
             expect(result).toEqual(mockUser);
@@ -77,7 +77,7 @@ describe('UserResolver', () => {
             const mockUser = { id: '1', ...createUserDto };
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
-            } as any);
+            } as unknown as import('bullmq').Job<any, any, string>);
 
             const result = await resolver.createUser(createUserDto);
             expect(result).toEqual(mockUser);

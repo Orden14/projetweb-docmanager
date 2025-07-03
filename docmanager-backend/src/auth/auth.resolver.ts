@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { UnauthorizedException } from '@nestjs/common';
 
 @Resolver()
 export class AuthResolver {
