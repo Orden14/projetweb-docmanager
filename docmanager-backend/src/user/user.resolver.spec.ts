@@ -42,7 +42,9 @@ describe('UserResolver', () => {
 
     describe('findAllUsers', () => {
         it('should return all users', async () => {
+             
             const mockUsers = [{ id: '1', name: 'John Doe' }];
+             
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUsers),
             } as any);
@@ -55,6 +57,7 @@ describe('UserResolver', () => {
 
     describe('getUserById', () => {
         it('should return a user by ID', async () => {
+             
             const mockUser = { id: '1', name: 'John Doe' };
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
@@ -74,6 +77,7 @@ describe('UserResolver', () => {
                 password: 'password123',
                 role: Role.USER,
             };
+             
             const mockUser = { id: '1', ...createUserDto };
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),

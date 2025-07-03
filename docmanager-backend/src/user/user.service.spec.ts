@@ -54,7 +54,11 @@ describe('UserService', () => {
             const result = await service.createUser(mockCreateUserDto);
             expect(result).toEqual(mockUser);
             expect(prismaService.user.create).toHaveBeenCalledWith({
-                data: mockCreateUserDto,
+                data: expect.objectContaining({
+                    ...mockCreateUserDto,
+                    password: expect.any(String),
+                    role: 'USER',
+                }),
             });
         });
     });

@@ -10,7 +10,4 @@ export class CreateDocumentDto {
 
         @Field()
             fileUrl: string;
-
-        @Field()
-            userId: string;
 }

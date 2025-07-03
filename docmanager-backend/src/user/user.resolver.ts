@@ -5,6 +5,8 @@ import { CreateUserDto } from './create-user.dto';
 import { User } from '../entities/user.entity';
 import { getRedisConnection } from '../bullmq/connection.util';
 import { UserJobName } from '../enum/user.job.enum';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from '../guards/admin.guard';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -15,6 +17,7 @@ export class UserResolver {
     }
 
     @Query(() => [User])
+    @UseGuards(AdminGuard)
     async findAllUsers(): Promise<User[]> {
         const job = await this.userQueue.add(UserJobName.FindAllUsers, {});
 

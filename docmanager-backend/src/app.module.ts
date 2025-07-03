@@ -11,13 +11,14 @@ import {DocumentModule} from "./document/document.module";
 import {UserModule} from "./user/user.module";
 import {CustomBullModule} from "./bullmq/bull.module";
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
         GraphQLModule.forRoot<ApolloDriverConfig>({
             driver: ApolloDriver,
-            autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+            autoSchemaFile: join(process.cwd(), '../schema.gql'),
             context: ({ req, res }: { req: Request; res: Response }) => ({
                 req,
                 res,
@@ -29,6 +30,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
         CustomBullModule,
         UserModule,
         DocumentModule,
+        AuthModule,
     ],
     controllers: [HealthController],
     providers: [
