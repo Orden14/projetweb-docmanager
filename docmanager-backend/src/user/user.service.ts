@@ -9,10 +9,8 @@ export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createUser(createUserDto: CreateUserDto): Promise<User> {
-        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-        if (typeof hashedPassword !== 'string') {
-            throw new Error('Hashing password failed');
-        }
+        const hashedPassword: string = await bcrypt.hash(createUserDto.password, 10);
+
         return this.prisma.user.create({
             data: {
                 name: createUserDto.name,
