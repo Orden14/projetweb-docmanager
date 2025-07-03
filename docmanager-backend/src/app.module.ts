@@ -2,36 +2,41 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HealthResolver } from './health/health.resolver';
-import { DocumentResolver } from './resolvers/document.resolver';
-import { DocumentService } from './services/document.service';
-import { UserResolver } from './resolvers/user.resolver';
-import { UserService } from './services/user.service';
 import { HealthController } from './health/health.controller';
-import { DocumentQueueService } from './queues/document.queue';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { join } from 'path';
+import {HealthProcessor} from "./health/health.processor";
+import {DocumentModule} from "./document/document.module";
+import {UserModule} from "./user/user.module";
+import {CustomBullModule} from "./bullmq/bull.module";
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
         GraphQLModule.forRoot<ApolloDriverConfig>({
             driver: ApolloDriver,
-            autoSchemaFile: true,
-            playground: true,
-            debug: true,
+            autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+            context: ({ req, res }: { req: Request; res: Response }) => ({
+                req,
+                res,
+            }),
+            playground: false,
+            plugins: [ApolloServerPluginLandingPageLocalDefault()],
         }),
         PrismaModule,
         AuthModule,
+        CustomBullModule,
+        UserModule,
+        DocumentModule,
     ],
     controllers: [HealthController],
     providers: [
+        HealthProcessor,
         HealthResolver,
-        DocumentResolver,
-        DocumentService,
-        UserResolver,
-        UserService,
-        DocumentQueueService,
     ],
 })
+
 export class AppModule {}

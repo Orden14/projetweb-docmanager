@@ -1,5 +1,5 @@
 import {Injectable, NotFoundException} from '@nestjs/common';
-import {CreateUserDto} from '../dto/create-user.dto';
+import {CreateUserDto} from './create-user.dto';
 import {PrismaService} from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -18,7 +18,7 @@ export class UserService {
     }
 
     async findAllUser() {
-        return await this.prisma.user.findMany();
+        return this.prisma.user.findMany();
     }
 
     async findUserByEmail(email: string) {
