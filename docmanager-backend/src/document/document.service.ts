@@ -2,18 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDocumentDto } from './create-document.dto';
 import { Document } from '../entities/document.entity';
+import { User } from '@prisma/client';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class DocumentService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService
+    ) {}
 
-    async createDocument(createDocumentDto: CreateDocumentDto): Promise<Document> {
+    async createDocument(
+        createDocumentDto: CreateDocumentDto,
+    ): Promise<Document> {
         return this.prisma.document.create({ data: createDocumentDto });
-    }
-
-    async delete(documentId: string): Promise<boolean> {
-        await this.prisma.document.delete({ where: { id: documentId } });
-        return true;
     }
 
     async findAll(): Promise<Document[]> {
@@ -25,7 +26,9 @@ export class DocumentService {
     }
 
     async findById(id: string): Promise<Document> {
-        const document = await this.prisma.document.findFirst({ where: { id } });
+        const document = await this.prisma.document.findFirst({
+            where: { id },
+        });
 
         if (!document) {
             throw new NotFoundException(`Document with ID ${id} not found`);
@@ -34,9 +37,37 @@ export class DocumentService {
         return document;
     }
 
-    async update(id: string, createDocumentDto: CreateDocumentDto): Promise<Document> {
-        return this.prisma.document.update({
-            where: { id },
+    async delete(documentId: string, userId : string) {
+        const doc = await this.prisma.document.findUnique({
+            where: { id: documentId },
+        });
+
+        if (!doc || (doc.userId !== userId && userRole !== 'admin')) {
+            throw new Error('Unauthorized or document not found');
+        }
+
+        return this.prisma.document.delete({
+            where: {
+                id: documentId,
+            },
+        });
+    }
+
+    async update(
+        id: string,
+        createDocumentDto: CreateDocumentDto,
+        userId: string,
+        userRole: string,
+    ) {
+        const doc = await this.prisma.document.findUnique({ where: { id } });
+        if (!doc || (doc.userId !== userId && userRole !== 'admin')) {
+            throw new Error('Unauthorized or document not found');
+        }
+        return await this.prisma.document.update({
+            where: {
+                id: id,
+            },
+
             data: createDocumentDto,
         });
     }

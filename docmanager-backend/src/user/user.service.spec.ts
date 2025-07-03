@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './create-user.dto';
 // import { User } from '@prisma/client'; // supprimé car inutilisé
 import * as bcrypt from 'bcrypt';
+import { Role } from '@prisma/client';
 
 describe('UserService', () => {
     let service: UserService;
@@ -14,7 +15,7 @@ describe('UserService', () => {
         name: 'John Doe',
         email: 'john@example.com',
         password: 'hashedPassword',
-        role: 'USER',
+        role: Role.USER,
         createdAt: new Date()
     };
 
@@ -22,7 +23,7 @@ describe('UserService', () => {
         name: 'John Doe',
         email: 'john@example.com',
         password: 'password',
-        role: 'USER'
+        role: Role.USER,
     };
 
     beforeEach(async () => {
@@ -94,4 +95,17 @@ describe('UserService', () => {
             await expect(service.deleteUser('1')).rejects.toThrow('Unauthorized: Only admin can delete users');
         });
     });
+
+    describe('deleteUser', () => {
+        it('should delete a user if admin', async () => {
+            prismaService.user.delete = jest.fn().mockResolvedValue(mockUser);
+            const result = await service.deleteUser('1');
+            expect(result).toEqual(mockUser);
+        });
+        it('should throw if not admin', async () => {
+            prismaService.user.delete = jest.fn().mockImplementation(() => { throw new Error('Unauthorized: Only admin can delete users'); });
+            await expect(service.deleteUser('1')).rejects.toThrow('Unauthorized: Only admin can delete users');
+        });
+    });
+
 });

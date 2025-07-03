@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Job } from 'bullmq';
+import { Job, raw2NextJobData } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserJobName } from '../enum/user.job.enum';
@@ -20,6 +20,8 @@ export class UserProcessor extends WorkerHost {
             return this.userService.findAllUser();
         case UserJobName.FindUserById:
             return this.userService.findUserById(job.data.id as string);
+        case UserJobName.DeleteUser:
+            return this.userService.deleteUser(job.data as string)
         default:
             throw new Error(`Unknown job name: ${String(job.name)}`);
         }

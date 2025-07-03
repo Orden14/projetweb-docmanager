@@ -5,33 +5,54 @@ import { CreateUserDto } from './create-user.dto';
 import { User } from '../entities/user.entity';
 import { getRedisConnection } from '../bullmq/connection.util';
 import { UserJobName } from '../enum/user.job.enum';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Resolver(() => User)
 export class UserResolver {
     private readonly queueEvents: QueueEvents;
 
     constructor(@InjectQueue('user') private readonly userQueue: Queue) {
-        this.queueEvents = new QueueEvents('user', { connection: getRedisConnection() });
+        this.queueEvents = new QueueEvents('user', {
+            connection: getRedisConnection(),
+        });
     }
 
     @Query(() => [User])
+    @UseGuards(AdminGuard)
     async findAllUsers(): Promise<User[]> {
         const job = await this.userQueue.add(UserJobName.FindAllUsers, {});
 
-        return await job.waitUntilFinished(this.queueEvents) as User[];
+        return (await job.waitUntilFinished(this.queueEvents)) as User[];
     }
 
     @Query(() => User, { nullable: true })
     async getUserById(@Args('id') id: string): Promise<User | null> {
         const job = await this.userQueue.add(UserJobName.FindUserById, { id });
 
-        return await job.waitUntilFinished(this.queueEvents) as User;
+        return (await job.waitUntilFinished(this.queueEvents)) as User;
     }
 
     @Mutation(() => User)
-    async createUser(@Args('createUserDto') createUserDto: CreateUserDto): Promise<User> {
-        const job = await this.userQueue.add(UserJobName.CreateUser, createUserDto);
+    async createUser(
+        @Args('createUserDto') createUserDto: CreateUserDto,
+    ): Promise<User> {
+        const job = await this.userQueue.add(
+            UserJobName.CreateUser,
+            createUserDto,
+        );
 
-        return await job.waitUntilFinished(this.queueEvents) as User;
+        return (await job.waitUntilFinished(this.queueEvents)) as User;
+    }
+
+    @Mutation(() => User)
+    @UseGuards(AdminGuard)
+    async deleteUser(@Args('id') id: string): Promise<User> {
+        const job = await this.userQueue.add(
+            UserJobName.DeleteUser,
+            id,
+        );
+
+        return (await job.waitUntilFinished(this.queueEvents)) as User;
     }
 }

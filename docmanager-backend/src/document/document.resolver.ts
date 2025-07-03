@@ -5,6 +5,8 @@ import { CreateDocumentDto } from './create-document.dto';
 import { Document } from '../entities/document.entity';
 import {getRedisConnection} from "../bullmq/connection.util";
 import {DocumentJobName} from "../enum/document.job.enum";
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Resolver()
 export class DocumentResolver {
@@ -36,6 +38,7 @@ export class DocumentResolver {
     }
 
     @Mutation(() => Document)
+    @UseGuards(AuthGuard)
     async createDocument(
         @Args('createDocumentDto') createDocumentDto: CreateDocumentDto,
     ): Promise<Document> {
@@ -59,6 +62,7 @@ export class DocumentResolver {
     }
 
     @Mutation(() => Boolean)
+    @UseGuards()
     async deleteDocument(@Args('id') id: string): Promise<boolean> {
         const job = await this.documentQueue.add(DocumentJobName.DeleteDocument, { documentId: id });
 
