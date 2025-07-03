@@ -15,7 +15,8 @@ export class AuthService {
     async signIn(email : string, password : string) : Promise<{access_token : string}> {
         const user: User | null = await this.userService.findUserByEmail(email);
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        const isMatch = (user && (await bcrypt.compare(password, user.password))) as boolean;
+        if (!user || !isMatch) {
             throw new UnauthorizedException('Mot de passe ou email incorrect');
         }
         
