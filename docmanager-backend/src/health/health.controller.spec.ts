@@ -1,40 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthController } from './health.controller';
-import { DocumentQueueService } from '../queues/document.queue';
+import { Queue } from 'bullmq';
+import { getQueueToken } from '@nestjs/bullmq';
 
 describe('HealthController', () => {
     let healthController: HealthController;
-
-    const mockDocumentQueueService = {
-        addJob: jest.fn().mockResolvedValue(null),
-    };
+    let healthQueue: Queue;
 
     beforeEach(async () => {
+        const mockQueue = {
+            add: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             controllers: [HealthController],
             providers: [
                 {
-                    provide: DocumentQueueService,
-                    useValue: mockDocumentQueueService,
+                    provide: getQueueToken('health'),
+                    useValue: mockQueue,
                 },
             ],
         }).compile();
 
         healthController = module.get<HealthController>(HealthController);
+        healthQueue = module.get<Queue>(getQueueToken('health'));
     });
 
     it('should be defined', () => {
         expect(healthController).toBeDefined();
     });
 
-    it('should return OK on healthCheck', async () => {
-        const result = await healthController.healthCheck();
+    it('should add a health-check job to the queue and return OK', async () => {
+        const result = await healthController.getHealth();
+        expect(healthQueue.add).toHaveBeenCalledWith('health-check', {});
         expect(result).toBe('OK');
-        expect(mockDocumentQueueService.addJob).toHaveBeenCalledWith(
-            'healthCheck',
-            {
-                message: 'Health check job',
-            },
-        );
     });
 });

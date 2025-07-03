@@ -1,15 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
-import { DocumentQueueService } from '../queues/document.queue';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Controller('health')
 export class HealthController {
-    constructor(private readonly documentQueueService: DocumentQueueService) {}
+    constructor(@InjectQueue('health') private readonly healthQueue: Queue) {}
 
     @Get()
-    async healthCheck(): Promise<string> {
-        await this.documentQueueService.addJob('healthCheck', {
-            message: 'Health check job',
-        });
+    async getHealth(): Promise<string> {
+        await this.healthQueue.add('health-check', {});
 
         return 'OK';
     }
