@@ -8,13 +8,17 @@ export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createUser(createUserDto: CreateUserDto) {
-        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-        return this.prisma.user.create({
-            data: {
-                ...createUserDto,
-                password: hashedPassword,
-            },
-        });
+        try {
+            const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+            return this.prisma.user.create({
+                data: {
+                    ...createUserDto,
+                    password: hashedPassword,
+                },
+            });
+        } catch (error: any) {
+            throw new Error(error?.message || 'Erreur lors de la création de l\'utilisateur');
+        }
     }
 
     async findAllUser() {
@@ -30,10 +34,14 @@ export class UserService {
     }
 
     async findUser(id: string) {
-        return this.prisma.user.findUnique({
-            where: {
-                id,
-            },
-        });
+        try {
+            return this.prisma.user.findUnique({
+                where: {
+                    id,
+                },
+            });
+        } catch (error: any) {
+            throw new Error(error?.message || 'Erreur lors de la recherche de l\'utilisateur');
+        }
     }
 }
