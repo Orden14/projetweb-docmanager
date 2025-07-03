@@ -9,14 +9,13 @@ export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createUser(createUserDto: CreateUserDto): Promise<User> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const hashedPassword = (await bcrypt.hash(createUserDto.password, 10));
+        const hashedPassword: string = await bcrypt.hash(createUserDto.password, 10);
         return this.prisma.user.create({
             data: {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                ...createUserDto,
+                name: createUserDto.name,
+                email: createUserDto.email,
                 password: hashedPassword,
+                role: createUserDto.role,
             },
         });
     }
