@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -13,10 +12,9 @@ export class AuthService {
     ) {}
 
     async signIn(email : string, password : string) : Promise<{access_token : string}> {
-        const user: User | null = await this.userService.findUserByEmail(email);
-
-        const isMatch = (user && (await bcrypt.compare(password, user.password))) as boolean;
-        if (!user || !isMatch) {
+        const user = await this.userService.findUserByEmail(email)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new UnauthorizedException('Mot de passe ou email incorrect');
         }
         
