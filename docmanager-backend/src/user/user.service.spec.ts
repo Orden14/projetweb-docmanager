@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './create-user.dto';
-import { User } from '@prisma/client';
+import { UserService } from './user.service';
 
 describe('UserService', () => {
     let service: UserService;
@@ -54,8 +54,10 @@ describe('UserService', () => {
             const result = await service.createUser(mockCreateUserDto);
             expect(result).toEqual(mockUser);
             expect(prismaService.user.create).toHaveBeenCalledWith({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 data: expect.objectContaining({
                     ...mockCreateUserDto,
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     password: expect.any(String),
                     role: 'USER',
                 }),
