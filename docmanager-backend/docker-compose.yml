@@ -46,8 +46,6 @@ services:
             retries: 3
         env_file:
             - .env
-        command: >
-            sh -c "npx prisma migrate deploy && npm run start:prod"
 
 volumes:
     postgres_data:
