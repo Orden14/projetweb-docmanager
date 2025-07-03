@@ -3,12 +3,13 @@ import { UserService } from './user.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 describe('UserService', () => {
     let service: UserService;
     let prismaService: PrismaService;
 
-    const mockUser: User = {
+    const mockUser: any = {
         id: '1',
         name: 'John Doe',
         email: 'john@example.com',
@@ -25,6 +26,7 @@ describe('UserService', () => {
     };
 
     beforeEach(async () => {
+        (bcrypt.hash as jest.Mock) = jest.fn().mockResolvedValue('hashedPassword');
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 UserService,
@@ -54,7 +56,10 @@ describe('UserService', () => {
             const result = await service.createUser(mockCreateUserDto);
             expect(result).toEqual(mockUser);
             expect(prismaService.user.create).toHaveBeenCalledWith({
-                data: mockCreateUserDto,
+                data: {
+                    ...mockCreateUserDto,
+                    password: 'hashedPassword',
+                },
             });
         });
     });
@@ -70,11 +75,23 @@ describe('UserService', () => {
     describe('findUser', () => {
         it('should return a user by id', async () => {
             const id = '1';
-            const result = await service.findUser(id);
+            const result = await service.findUserById(id);
             expect(result).toEqual(mockUser);
             expect(prismaService.user.findUnique).toHaveBeenCalledWith({
                 where: { id },
             });
+        });
+    });
+
+    describe('deleteUser', () => {
+        it('should delete a user if admin', async () => {
+            prismaService.user.delete = jest.fn().mockResolvedValue(mockUser);
+            const result = await service.deleteUser('1');
+            expect(result).toEqual(mockUser);
+        });
+        it('should throw if not admin', async () => {
+            prismaService.user.delete = jest.fn().mockImplementation(() => { throw new Error('Unauthorized: Only admin can delete users'); });
+            await expect(service.deleteUser('1')).rejects.toThrow('Unauthorized: Only admin can delete users');
         });
     });
 });

@@ -1,7 +1,9 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Context } from '@nestjs/graphql';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { Document } from '../entities/document.entity';
 import { DocumentService } from '../services/document.service';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Resolver(() => Document)
 export class DocumentResolver {
@@ -23,6 +25,7 @@ export class DocumentResolver {
     }
 
     @Mutation(() => Document)
+    @UseGuards(AuthGuard)
     async createDocument(
         @Args('createDocumentDto') createDocumentDto: CreateDocumentDto,
     ): Promise<Document> {
@@ -30,24 +33,30 @@ export class DocumentResolver {
     }
 
     @Mutation(() => Document)
+    @UseGuards(AuthGuard)
     async updateDocument(
         @Args('id') id: string,
         @Args('title', { nullable: true }) title: string,
         @Args('description', { nullable: true }) description: string,
         @Args('fileUrl', { nullable: true }) fileUrl: string,
-        @Args('userId', { nullable: true }) userId: string,
+        @Context() context
     ): Promise<Document> {
+        const userId = context.req.user.sub;
+        const userRole = context.req.user.role;
         const updateDto: CreateDocumentDto = {
             title,
             description,
             fileUrl,
             userId,
         };
-        return await this.documentService.update(id, updateDto);
+        return await this.documentService.update(id, updateDto, userId, userRole);
     }
 
     @Mutation(() => Document, { nullable: true })
-    async deleteDocument(@Args('id') id: string): Promise<Document | null> {
-        return await this.documentService.delete(id);
+    @UseGuards(AuthGuard)
+    async deleteDocument(@Args('id') id: string, @Context() context): Promise<Document | null> {
+        const userId = context.req.user.sub;
+        const userRole = context.req.user.role;
+        return await this.documentService.delete(id, userId, userRole);
     }
 }

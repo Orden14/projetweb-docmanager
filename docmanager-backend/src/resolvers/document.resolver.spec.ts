@@ -39,6 +39,16 @@ describe('DocumentResolver', () => {
                         delete: jest.fn().mockResolvedValue(mockDocument),
                     },
                 },
+                {
+                    provide: require('../auth/auth.guard').AuthGuard,
+                    useValue: { canActivate: jest.fn().mockReturnValue(true) }
+                },
+                {
+                    provide: require('@nestjs/jwt').JwtService,
+                    useValue: {
+                        verifyAsync: jest.fn().mockResolvedValue({ userId: '1' }),
+                    },
+                },
             ],
         }).compile();
 
@@ -78,21 +88,39 @@ describe('DocumentResolver', () => {
     });
 
     describe('updateDocument', () => {
-        it('should update a document', async () => {
+        it('should update a document (user owner)', async () => {
+            const mockContext = { req: { user: { sub: '1', role: 'user' } } };
             const result = await resolver.updateDocument(
                 '1',
                 'Updated Title',
                 'Updated Description',
                 'updated.pdf',
+                mockContext
+            );
+            expect(result).toEqual(mockDocument);
+        });
+        it('should update a document (admin)', async () => {
+            const mockContext = { req: { user: { sub: 'adminId', role: 'admin' } } };
+            const result = await resolver.updateDocument(
                 '1',
+                'Updated Title',
+                'Updated Description',
+                'updated.pdf',
+                mockContext
             );
             expect(result).toEqual(mockDocument);
         });
     });
 
     describe('deleteDocument', () => {
-        it('should delete a document', async () => {
-            const result = await resolver.deleteDocument('1');
+        it('should delete a document (user owner)', async () => {
+            const mockContext = { req: { user: { sub: '1', role: 'user' } } };
+            const result = await resolver.deleteDocument('1', mockContext);
+            expect(result).toEqual(mockDocument);
+        });
+        it('should delete a document (admin)', async () => {
+            const mockContext = { req: { user: { sub: 'adminId', role: 'admin' } } };
+            const result = await resolver.deleteDocument('1', mockContext);
             expect(result).toEqual(mockDocument);
         });
     });

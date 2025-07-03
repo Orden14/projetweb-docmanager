@@ -10,6 +10,7 @@ import { HealthController } from './health/health.controller';
 import { DocumentQueueService } from './queues/document.queue';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
             debug: true,
         }),
         PrismaModule,
+        AuthModule,
     ],
     controllers: [HealthController],
     providers: [

@@ -12,11 +12,14 @@ export class DocumentService {
         });
     }
 
-    async delete(documentId: string) {
+    async delete(documentId: string, userId: string, userRole: string) {
+        // Vérifie que le document appartient à l'utilisateur ou que l'utilisateur est admin
+        const doc = await this.prisma.document.findUnique({ where: { id: documentId } });
+        if (!doc || (doc.userId !== userId && userRole !== 'admin')) {
+            throw new Error('Unauthorized or document not found');
+        }
         return await this.prisma.document.delete({
-            where: {
-                id: documentId,
-            },
+            where: { id: documentId },
         });
     }
 
@@ -40,11 +43,13 @@ export class DocumentService {
         });
     }
 
-    async update(id: string, createDocumentDto: CreateDocumentDto) {
+    async update(id: string, createDocumentDto: CreateDocumentDto, userId: string, userRole: string) {
+        const doc = await this.prisma.document.findUnique({ where: { id } });
+        if (!doc || (doc.userId !== userId && userRole !== 'admin')) {
+            throw new Error('Unauthorized or document not found');
+        }
         return await this.prisma.document.update({
-            where: {
-                id: id,
-            },
+            where: { id },
             data: createDocumentDto,
         });
     }

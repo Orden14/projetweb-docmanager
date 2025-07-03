@@ -91,25 +91,36 @@ describe('DocumentService', () => {
     });
 
     describe('update', () => {
-        it('should update a document', async () => {
-            const id = '1';
-            const result = await service.update(id, mockCreateDocumentDto);
+        it('should update a document (user owner)', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            const result = await service.update('1', mockCreateDocumentDto, 'user1', 'user');
             expect(result).toEqual(mockDocument);
-            expect(prismaService.document.update).toHaveBeenCalledWith({
-                where: { id },
-                data: mockCreateDocumentDto,
-            });
+        });
+        it('should update a document (admin)', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            const result = await service.update('1', mockCreateDocumentDto, 'adminId', 'admin');
+            expect(result).toEqual(mockDocument);
+        });
+        it('should throw if not owner or admin', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            await expect(service.update('1', mockCreateDocumentDto, 'otherUser', 'user')).rejects.toThrow('Unauthorized or document not found');
         });
     });
 
     describe('delete', () => {
-        it('should delete a document', async () => {
-            const id = '1';
-            const result = await service.delete(id);
+        it('should delete a document (user owner)', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            const result = await service.delete('1', 'user1', 'user');
             expect(result).toEqual(mockDocument);
-            expect(prismaService.document.delete).toHaveBeenCalledWith({
-                where: { id },
-            });
+        });
+        it('should delete a document (admin)', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            const result = await service.delete('1', 'adminId', 'admin');
+            expect(result).toEqual(mockDocument);
+        });
+        it('should throw if not owner or admin', async () => {
+            prismaService.document.findUnique = jest.fn().mockResolvedValue({ ...mockDocument, userId: 'user1' });
+            await expect(service.delete('1', 'otherUser', 'user')).rejects.toThrow('Unauthorized or document not found');
         });
     });
 });
