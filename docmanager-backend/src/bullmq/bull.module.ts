@@ -14,6 +14,9 @@ import {getRedisConnection} from "./connection.util";
         BullModule.registerQueue({
             name: 'document',
         }),
+        BullModule.registerQueue({
+            name: 'user',
+        }),
     ],
     exports: [BullModule],
 })

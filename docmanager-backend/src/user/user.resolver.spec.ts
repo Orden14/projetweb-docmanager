@@ -1,44 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
-import { User } from '../entities/user.entity';
-import { CreateUserDto } from './create-user.dto';
-import { Role } from '@prisma/client';
+import { Queue } from 'bullmq';
+import { UserJobName } from '../enum/user.job.enum';
+import {Role} from "@prisma/client";
 
 describe('UserResolver', () => {
     let resolver: UserResolver;
-
-    const mockUser: User = {
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-        password: 'password',
-        role: Role.USER,
-    };
-
-    const mockCreateUserDto: CreateUserDto = {
-        name: 'Test User',
-        email: 'test@example.com',
-        password: 'password',
-        role: Role.USER
-    };
+    let userQueue: Queue;
 
     beforeEach(async () => {
+        const mockQueue = {
+            add: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 UserResolver,
                 {
                     provide: UserService,
                     useValue: {
-                        findAllUser: jest.fn().mockResolvedValue([mockUser]),
-                        findUser: jest.fn().mockResolvedValue(mockUser),
-                        createUser: jest.fn().mockResolvedValue(mockUser)
-                    }
-                }
-            ]
+                        createUser: jest.fn(),
+                        findAllUser: jest.fn(),
+                        findUser: jest.fn(),
+                    },
+                },
+                {
+                    provide: 'BullQueue_user',
+                    useValue: mockQueue,
+                },
+            ],
         }).compile();
 
         resolver = module.get<UserResolver>(UserResolver);
+        userQueue = module.get<Queue>('BullQueue_user');
     });
 
     it('should be defined', () => {
@@ -46,23 +41,47 @@ describe('UserResolver', () => {
     });
 
     describe('findAllUsers', () => {
-        it('should return an array of users', async () => {
+        it('should return all users', async () => {
+            const mockUsers = [{ id: '1', name: 'John Doe' }];
+            jest.spyOn(userQueue, 'add').mockResolvedValue({
+                waitUntilFinished: jest.fn().mockResolvedValue(mockUsers),
+            } as any);
+
             const result = await resolver.findAllUsers();
-            expect(result).toEqual([mockUser]);
+            expect(result).toEqual(mockUsers);
+            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.FindAllUsers, {});
         });
     });
 
     describe('getUserById', () => {
-        it('should return a single user', async () => {
+        it('should return a user by ID', async () => {
+            const mockUser = { id: '1', name: 'John Doe' };
+            jest.spyOn(userQueue, 'add').mockResolvedValue({
+                waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
+            } as any);
+
             const result = await resolver.getUserById('1');
             expect(result).toEqual(mockUser);
+            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.FindUserById, { id: '1' });
         });
     });
 
     describe('createUser', () => {
         it('should create a user', async () => {
-            const result = await resolver.createUser(mockCreateUserDto);
+            const createUserDto = {
+                name: 'John Doe',
+                email: 'john@example.com',
+                password: 'password123',
+                role: Role.USER,
+            };
+            const mockUser = { id: '1', ...createUserDto };
+            jest.spyOn(userQueue, 'add').mockResolvedValue({
+                waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
+            } as any);
+
+            const result = await resolver.createUser(createUserDto);
             expect(result).toEqual(mockUser);
+            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.CreateUser, createUserDto);
         });
     });
 });
