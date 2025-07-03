@@ -1,9 +1,10 @@
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DocumentResolver } from './document.resolver';
 import { Queue } from 'bullmq';
+import { AuthGuard } from '../auth/auth.guard';
 import { DocumentJobName } from '../enum/document.job.enum';
 import { CreateDocumentDto } from './create-document.dto';
-import { Document } from '../entities/document.entity';
+import { DocumentResolver } from './document.resolver';
 
 describe('DocumentResolver', () => {
     let resolver: DocumentResolver;
@@ -22,6 +23,8 @@ describe('DocumentResolver', () => {
             providers: [
                 DocumentResolver,
                 { provide: 'BullQueue_document', useValue: mockQueue },
+                { provide: JwtService, useValue: { verifyAsync: jest.fn() } },
+                AuthGuard,
             ],
         }).compile();
 
@@ -47,9 +50,10 @@ describe('DocumentResolver', () => {
 
     it('should get document by id', async () => {
         const id = '456';
-        const result = await resolver.getDocumentById(id);
-        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.FindDocumentById, { id });
-        expect(result).toEqual({ id });
+        const context = { req: { user: { sub: '123' } } };
+        const result = await resolver.getDocumentById(id, context);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.FindDocumentById, { id, userId: '123' });
+        expect(result).toEqual({ id, userId: '123' });
     });
 
     it('should create a document', async () => {
@@ -57,11 +61,11 @@ describe('DocumentResolver', () => {
             title: 'Test Title',
             description: 'Test Description',
             fileUrl: 'http://example.com/file',
-            userId: '789',
         };
-        const result = await resolver.createDocument(createDocumentDto);
-        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.CreateDocument, createDocumentDto);
-        expect(result).toEqual(createDocumentDto);
+        const context = { req: { user: { sub: '789' } } };
+        const result = await resolver.createDocument(createDocumentDto, context);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.CreateDocument, { ...createDocumentDto, userId: '789' });
+        expect(result).toEqual({ ...createDocumentDto, userId: '789' });
     });
 
     it('should update a document', async () => {
@@ -70,17 +74,18 @@ describe('DocumentResolver', () => {
             title: 'Updated Title',
             description: 'Updated Description',
             fileUrl: 'http://example.com/updated-file',
-            userId: '456',
         };
-        const result = await resolver.updateDocument(id, updateDto.title, updateDto.description, updateDto.fileUrl, updateDto.userId);
-        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.UpdateDocument, { id, data: updateDto });
-        expect(result).toEqual({ id, data: updateDto });
+        const context = { req: { user: { sub: '456', role: 'admin' } } };
+        const result = await resolver.updateDocument(id, updateDto.title, updateDto.description, updateDto.fileUrl, context);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.UpdateDocument, { id, data: updateDto, userId: '456', userRole: 'admin' });
+        expect(result).toEqual({ id, data: updateDto, userId: '456', userRole: 'admin' });
     });
 
     it('should delete a document', async () => {
         const id = '789';
-        const result = await resolver.deleteDocument(id);
-        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.DeleteDocument, { documentId: id });
-        expect(result).toEqual({ documentId: id });
+        const context = { req: { user: { sub: '456', role: 'admin' } } };
+        const result = await resolver.deleteDocument(id, context);
+        expect(mockQueue.add).toHaveBeenCalledWith(DocumentJobName.DeleteDocument, { documentId: id, userId: '456', userRole: 'admin' });
+        expect(result).toEqual({ documentId: id, userId: '456', userRole: 'admin' });
     });
 });

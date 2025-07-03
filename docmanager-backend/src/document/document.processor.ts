@@ -2,8 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { DocumentService } from './document.service';
-import {DocumentJobName} from "../enum/document.job.enum";
-import {CreateDocumentDto} from "./create-document.dto";
+import { DocumentJobName } from '../enum/document.job.enum';
+import { CreateDocumentDto } from './create-document.dto';
 
 @Injectable()
 @Processor('document')
@@ -15,17 +15,29 @@ export class DocumentProcessor extends WorkerHost {
     async process(job: Job): Promise<any> {
         switch (job.name) {
         case DocumentJobName.CreateDocument:
-            return this.documentService.createDocument(job.data as CreateDocumentDto);
+            return this.documentService.createDocument(
+                    job.data as CreateDocumentDto & { userId: string },
+            );
         case DocumentJobName.DeleteDocument:
-            return this.documentService.delete(job.data.documentId as string);
+            return this.documentService.delete(
+                    job.data.documentId as string,
+                    job.data.userId as string,
+            );
         case DocumentJobName.FindAllDocuments:
             return this.documentService.findAll();
         case DocumentJobName.FindDocumentsByUser:
-            return this.documentService.findByUser(job.data.userId as string);
+            return this.documentService.findByUser(
+                    job.data.userId as string,
+            );
         case DocumentJobName.FindDocumentById:
-            return this.documentService.findById(job.data.id as string);
+            return this.documentService.findById(job.data.id as string, job.data.userId as string);
         case DocumentJobName.UpdateDocument:
-            return this.documentService.update(job.data.id as string, job.data.data as CreateDocumentDto);
+            return this.documentService.update(
+                    job.data.id as string,
+                    job.data.data as CreateDocumentDto,
+                    job.data.userId as string,
+                    job.data.userRole as string,
+            );
         default:
             throw new Error(`Unknown job name: ${job.name}`);
         }

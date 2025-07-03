@@ -19,6 +19,7 @@ describe('DocumentService', () => {
                             delete: jest.fn(),
                             findMany: jest.fn(),
                             findFirst: jest.fn(),
+                            findUnique: jest.fn(),
                             update: jest.fn(),
                         },
                     },
@@ -54,10 +55,11 @@ describe('DocumentService', () => {
 
     describe('delete', () => {
         it('should delete a document', async () => {
+            (prismaService.document.findUnique as jest.Mock).mockResolvedValue({ id: '1', userId: '123' });
             jest.spyOn(prismaService.document, 'delete').mockResolvedValue({ id: '1', title: '', description: '', fileUrl: '', userId: '' });
 
-            const result = await service.delete('1');
-            expect(result).toBe(true);
+            const result = await service.delete('1', '123');
+            expect(result).toBe('Document supprimé');
             expect(prismaService.document.delete).toHaveBeenCalledWith({ where: { id: '1' } });
         });
     });
@@ -98,7 +100,7 @@ describe('DocumentService', () => {
 
             jest.spyOn(prismaService.document, 'findFirst').mockResolvedValue(document);
 
-            const result = await service.findById('1');
+            const result = await service.findById('1', '123');
             expect(result).toEqual(document);
             expect(prismaService.document.findFirst).toHaveBeenCalledWith({ where: { id: '1' } });
         });
@@ -106,7 +108,7 @@ describe('DocumentService', () => {
         it('should throw NotFoundException if document not found', async () => {
             jest.spyOn(prismaService.document, 'findFirst').mockResolvedValue(null);
 
-            await expect(service.findById('1')).rejects.toThrow(NotFoundException);
+            await expect(service.findById('1', '123')).rejects.toThrow(NotFoundException);
         });
     });
 
@@ -114,15 +116,15 @@ describe('DocumentService', () => {
         it('should update a document', async () => {
             const updateDto = {
                 title: 'Updated Title',
-                userId: '123',
                 description: 'Updated Description',
                 fileUrl: 'http://example.com/updated.pdf',
+                userId: '123',
             };
             const updatedDocument = { id: '1', ...updateDto };
-
+            (prismaService.document.findUnique as jest.Mock).mockResolvedValue({ id: '1', userId: '123' });
             jest.spyOn(prismaService.document, 'update').mockResolvedValue(updatedDocument);
 
-            const result = await service.update('1', updateDto);
+            const result = await service.update('1', updateDto, '123', 'admin');
             expect(result).toEqual(updatedDocument);
             expect(prismaService.document.update).toHaveBeenCalledWith({
                 where: { id: '1' },

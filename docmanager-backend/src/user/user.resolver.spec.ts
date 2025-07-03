@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserResolver } from './user.resolver';
-import { UserService } from './user.service';
+import { Role } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { UserJobName } from '../enum/user.job.enum';
-import {Role} from "@prisma/client";
+import { UserResolver } from './user.resolver';
+import { UserService } from './user.service';
 
 describe('UserResolver', () => {
     let resolver: UserResolver;
@@ -43,26 +43,34 @@ describe('UserResolver', () => {
     describe('findAllUsers', () => {
         it('should return all users', async () => {
             const mockUsers = [{ id: '1', name: 'John Doe' }];
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUsers),
             } as any);
 
             const result = await resolver.findAllUsers();
             expect(result).toEqual(mockUsers);
-            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.FindAllUsers, {});
+            expect(userQueue.add).toHaveBeenCalledWith(
+                UserJobName.FindAllUsers,
+                {},
+            );
         });
     });
 
     describe('getUserById', () => {
         it('should return a user by ID', async () => {
             const mockUser = { id: '1', name: 'John Doe' };
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
             } as any);
 
             const result = await resolver.getUserById('1');
             expect(result).toEqual(mockUser);
-            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.FindUserById, { id: '1' });
+            expect(userQueue.add).toHaveBeenCalledWith(
+                UserJobName.FindUserById,
+                { id: '1' },
+            );
         });
     });
 
@@ -74,14 +82,19 @@ describe('UserResolver', () => {
                 password: 'password123',
                 role: Role.USER,
             };
+
             const mockUser = { id: '1', ...createUserDto };
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             jest.spyOn(userQueue, 'add').mockResolvedValue({
                 waitUntilFinished: jest.fn().mockResolvedValue(mockUser),
             } as any);
 
             const result = await resolver.createUser(createUserDto);
             expect(result).toEqual(mockUser);
-            expect(userQueue.add).toHaveBeenCalledWith(UserJobName.CreateUser, createUserDto);
+            expect(userQueue.add).toHaveBeenCalledWith(
+                UserJobName.CreateUser,
+                createUserDto,
+            );
         });
     });
 });
