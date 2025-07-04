@@ -1,0 +1,25 @@
+{
+	"id": "0cdb4125-5d75-4432-bcfc-01b300dd4655",
+	"name": "DocManager Local",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "localhost:3000",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "document_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-07-03T23:09:36.279Z",
+	"_postman_exported_using": "Postman/11.52.4"
+}
