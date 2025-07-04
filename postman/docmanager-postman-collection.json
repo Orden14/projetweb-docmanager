@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "5b9ce0d9-974c-489f-9033-0a10c7825aa8",
-		"name": "DocManager GraphQL Integration Tests - v6",
+		"_postman_id": "526dbcd8-09ad-41ae-afd9-01db03e4b588",
+		"name": "DocManager GraphQL Integration Tests - v6 Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20235017"
 	},
@@ -176,6 +176,50 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"query\": \"query { getDocumentById(id: \\\"{{document_id}}\\\") { id title description fileUrl } }\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/graphql",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find All Documents",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Found documents successfully\", function () {",
+							"    pm.expect(jsonData.data.findAllDocuments).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"query\": \"query { findAllDocuments { id title description fileUrl } }\"\n}"
 				},
 				"url": {
 					"raw": "{{base_url}}/graphql",
