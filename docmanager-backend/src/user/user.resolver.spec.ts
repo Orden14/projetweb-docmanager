@@ -5,6 +5,18 @@ import { UserJobName } from '../enum/user.job.enum';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 
+
+jest.mock('../auth/auth.guard', () => ({
+    AuthGuard: jest.fn().mockImplementation(() => ({
+        canActivate: jest.fn().mockReturnValue(true),
+    })),
+}));
+jest.mock('../guards/admin.guard', () => ({
+    AdminGuard: jest.fn().mockImplementation(() => ({
+        canActivate: jest.fn().mockReturnValue(true),
+    })),
+}));
+
 describe('UserResolver', () => {
     let resolver: UserResolver;
     let userQueue: Queue;
