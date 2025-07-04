@@ -18,7 +18,7 @@ export class DocumentResolver {
     }
 
     @Query(() => [Document])
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard, AdminGuard)
     async findAllDocuments(): Promise<Document[]> {
         const job = await this.documentQueue.add(DocumentJobName.FindAllDocuments, {});
 
@@ -71,7 +71,7 @@ export class DocumentResolver {
         return await job.waitUntilFinished(this.queueEvents) as Document;
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => String)
     @UseGuards(AuthGuard)
     async deleteDocument(@Args('id') id: string, @Context() context: { req: { user: { sub: string; role: string } } }): Promise<boolean> {
         const userId = context.req.user.sub;

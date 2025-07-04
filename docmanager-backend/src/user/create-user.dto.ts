@@ -16,6 +16,6 @@ export class CreateUserDto {
     @Field()
         password: string;
 
-    @Field(() => Role)
-        role: Role;
+    @Field(() => Role, { nullable: true })
+        role?: Role;
 }

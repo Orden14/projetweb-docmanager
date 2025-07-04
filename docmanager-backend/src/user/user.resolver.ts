@@ -7,6 +7,7 @@ import { getRedisConnection } from '../bullmq/connection.util';
 import { UserJobName } from '../enum/user.job.enum';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../guards/admin.guard';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -17,7 +18,7 @@ export class UserResolver {
     }
 
     @Query(() => [User])
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard, AdminGuard)
     async findAllUsers(): Promise<User[]> {
         const job = await this.userQueue.add(UserJobName.FindAllUsers, {});
 

@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { Role } from '@prisma/client';
 
  
 @Injectable()
@@ -12,11 +13,13 @@ export class AdminGuard implements CanActivate {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const user = request.user;
 
+        console.log(user)
+
         if (!user) {
             throw new ForbiddenException('Accès refusé : utilisateur non authentifié.');
         }
 
-        if (user.role !== "ADMIN") {
+        if (user.role !== Role.ADMIN) {
             throw new ForbiddenException('Accès réservé aux administrateurs.');
         }
 
