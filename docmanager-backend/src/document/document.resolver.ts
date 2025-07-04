@@ -18,7 +18,7 @@ export class DocumentResolver {
     }
 
     @Query(() => [Document])
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard, AdminGuard)
     async findAllDocuments(): Promise<Document[]> {
         const job = await this.documentQueue.add(DocumentJobName.FindAllDocuments, {});
 
